@@ -45,6 +45,7 @@ jobs:
       - name: Build (static export)
         env:
           NEXT_PUBLIC_BASE_PATH: ${{ steps.basepath.outputs.base }}
+          NEXT_PUBLIC_PACK_PAYMENT_URL: ${{ vars.NEXT_PUBLIC_PACK_PAYMENT_URL }}
         run: |
           npm run build
           touch out/.nojekyll
