@@ -117,13 +117,15 @@ export default function XmrPayModal({ open, onClose }: Props) {
     import('qrcode')
       .then(async (mod) => {
         const QRCode = mod.default ?? mod;
-        const svg = await QRCode.toString(order.uri, {
+        let svg = await QRCode.toString(order.uri, {
           type: 'svg',
           errorCorrectionLevel: 'M',
           margin: 1,
           color: { dark: '#0a0a0a', light: '#f5f3ee' },
-          width: 512,
         });
+        // Strip fixed width/height so the SVG scales to its container
+        // (qrcode lib injects them even when omitted from options).
+        svg = svg.replace(/\s(width|height)="[^"]*"/g, '');
         if (!cancelled) setQrSvg(svg);
       })
       .catch(() => {
@@ -226,14 +228,14 @@ export default function XmrPayModal({ open, onClose }: Props) {
           </div>
         ) : (
           <div className="grid flex-1 overflow-y-auto md:grid-cols-[320px_1fr]">
-            <div className="flex flex-col gap-4 border-b border-cotton/10 bg-onyx p-5 sm:p-6 md:border-b-0 md:border-r">
-              <div className="mono text-[10px] tracking-widest text-cotton/40">
-                ESCANEA · O TAP "ABRIR WALLET"
+            <div className="flex flex-col gap-4 border-b border-cotton/10 bg-onyx p-4 sm:p-6 md:border-b-0 md:border-r">
+              <div className="mono text-center text-[10px] tracking-widest text-cotton/40 md:text-left">
+                ESCANEA · O TAP &quot;ABRIR WALLET&quot;
               </div>
-              <div className="relative aspect-square w-full overflow-hidden rounded-sm bg-cotton p-3 sm:p-4">
+              <div className="relative mx-auto aspect-square w-full max-w-[220px] overflow-hidden rounded-sm bg-cotton p-3 sm:max-w-[260px] sm:p-4 md:max-w-none">
                 {qrSvg ? (
                   <div
-                    className="h-full w-full"
+                    className="h-full w-full [&>svg]:block [&>svg]:h-full [&>svg]:w-full"
                     dangerouslySetInnerHTML={{ __html: qrSvg }}
                     aria-label={`QR Monero para orden ${order?.id || ''}`}
                   />
@@ -241,7 +243,7 @@ export default function XmrPayModal({ open, onClose }: Props) {
                   <img
                     src={FALLBACK_QR}
                     alt={`QR Monero ${batchTag}`}
-                    className="h-full w-full"
+                    className="block h-full w-full"
                   />
                 )}
                 {qrLoading && (
