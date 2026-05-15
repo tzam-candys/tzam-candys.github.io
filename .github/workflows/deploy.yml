@@ -214,16 +214,15 @@ jobs:
           if [ "$CLOSED" = "1" ]; then
             STATUS="⚠️ LOTE CERRADO — sin pago"
           fi
-          MSG=$(cat <<EOF
-TZAM · $STATUS
-trigger: \`$TRIGGER\`
-batch:   \`${BATCH:-—}\`
-fp:      \`${FP:-—}\`
-pack:    \`${AMOUNT_PACK:-—} XMR\`  · 1 XMR ≈ ${RATE:-—} MXN
-cierra:  \`${CLOSES_AT:-—}\`
-sha:     \`${SHA:0:7}\`
-EOF
-)
+          SHA_SHORT="${SHA:0:7}"
+          MSG=$(printf '%s\n' \
+            "TZAM · ${STATUS}" \
+            "trigger: \`${TRIGGER}\`" \
+            "batch:   \`${BATCH:-—}\`" \
+            "fp:      \`${FP:-—}\`" \
+            "pack:    \`${AMOUNT_PACK:-—} XMR\`  · 1 XMR ≈ ${RATE:-—} MXN" \
+            "cierra:  \`${CLOSES_AT:-—}\`" \
+            "sha:     \`${SHA_SHORT}\`")
           curl -sS -o /dev/null -X POST \
             "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
