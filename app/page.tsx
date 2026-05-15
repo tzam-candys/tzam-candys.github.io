@@ -15,6 +15,10 @@ import {
   XMR_BATCH_OPENED_AT,
   CONTACT_EMAIL,
   mailtoUrl,
+  TELEGRAM_CHANNEL,
+  TELEGRAM_CHANNEL_URL,
+  PGP_FINGERPRINT,
+  PGP_PUBKEY_URL,
 } from '@/lib/checkout';
 import TerminalOverlay from '@/components/TerminalOverlay';
 import data from '@/data/batches.json';
@@ -370,6 +374,14 @@ export default function Home() {
                     ['1', 'Pagas en Monero al monto único de tu orden'],
                     ['2', 'Mandas TX proof + envío por Telegram'],
                     ['3', 'Recibes Citrus, Mint y Cherry en un solo paquete'],
+                    ...(TELEGRAM_CHANNEL
+                      ? [
+                          [
+                            '4',
+                            `Anunciamos el envío en @${TELEGRAM_CHANNEL} con tu Order ID — sin DM extra.`,
+                          ] as [string, string],
+                        ]
+                      : []),
                   ]
                 : [
                     ['1', `Nos escribes a ${CONTACT_EMAIL}`],
@@ -503,6 +515,22 @@ export default function Home() {
                 '¿Qué pasa con Kinetic?',
                 'Kinetic está en desarrollo. Contiene cafeína y se mostrará con advertencia antes de habilitar venta.',
               ],
+              ...(TELEGRAM_CHANNEL && XMR_ENABLED
+                ? [
+                    [
+                      '¿Cómo sé que mi pack salió?',
+                      `Anunciamos cada envío en el canal público @${TELEGRAM_CHANNEL} con tu Order ID. Solo tú reconoces tu ID porque sólo tú lo guardaste al pagar. Si quieres tracking exacto, escríbenos por Telegram con tu Order ID.`,
+                    ] as [string, string],
+                  ]
+                : []),
+              ...(PGP_FINGERPRINT
+                ? [
+                    [
+                      '¿Aceptan comunicación cifrada con PGP?',
+                      `Sí. Cifra el TX proof + dirección con nuestra clave pública (fingerprint en el footer) y mándalo por Telegram o email. Recomendado para clientes que ya manejan PGP.`,
+                    ] as [string, string],
+                  ]
+                : []),
             ].map(([question, answer]) => (
               <div key={question} className="grid gap-3 py-5 sm:grid-cols-[220px_1fr]">
                 <h3 className="font-bold">{question}</h3>
@@ -513,26 +541,56 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="mono flex flex-wrap items-center justify-between gap-4 border-t border-cotton/10 px-6 py-12 text-[11px] text-cotton/50 sm:px-12">
-        <div>TZAM · dulces premium hechos en San Luis Potosí · 2026</div>
-        <div className="flex flex-wrap gap-5">
-          {XMR_ENABLED && (
-            <TelegramButton
-              tipo="INFO_GENERAL"
-              usuario="PIE"
+      <footer className="mono flex flex-col gap-6 border-t border-cotton/10 px-6 py-12 text-[11px] text-cotton/50 sm:px-12">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>TZAM · dulces premium hechos en San Luis Potosí · 2026</div>
+          <div className="flex flex-wrap gap-5">
+            {XMR_ENABLED && (
+              <TelegramButton
+                tipo="INFO_GENERAL"
+                usuario="PIE"
+                className="inline-flex min-h-[44px] items-center hover:text-kinetic active:text-kinetic"
+              >
+                /soporte-telegram
+              </TelegramButton>
+            )}
+            {TELEGRAM_CHANNEL && (
+              <a
+                href={TELEGRAM_CHANNEL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[44px] items-center hover:text-kinetic active:text-kinetic"
+                aria-label={`Canal Telegram @${TELEGRAM_CHANNEL}`}
+              >
+                /@{TELEGRAM_CHANNEL}
+              </a>
+            )}
+            <a
+              href={emailHref}
               className="inline-flex min-h-[44px] items-center hover:text-kinetic active:text-kinetic"
+              aria-label={`Escribir a ${CONTACT_EMAIL}`}
             >
-              /soporte-telegram
-            </TelegramButton>
-          )}
-          <a
-            href={emailHref}
-            className="inline-flex min-h-[44px] items-center hover:text-kinetic active:text-kinetic"
-            aria-label={`Escribir a ${CONTACT_EMAIL}`}
-          >
-            /{CONTACT_EMAIL}
-          </a>
+              /{CONTACT_EMAIL}
+            </a>
+          </div>
         </div>
+        {PGP_FINGERPRINT && (
+          <div className="flex flex-wrap items-center gap-3 border-t border-cotton/10 pt-4 text-[10px] tracking-widest text-cotton/40">
+            <span>PGP</span>
+            <span className="break-all text-cotton/70">{PGP_FINGERPRINT}</span>
+            {PGP_PUBKEY_URL && (
+              <a
+                href={PGP_PUBKEY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[44px] items-center hover:text-kinetic active:text-kinetic"
+                aria-label="Descargar clave pública PGP"
+              >
+                /pubkey
+              </a>
+            )}
+          </div>
+        )}
       </footer>
 
       <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col gap-2 border-t border-kinetic/30 bg-onyx/95 px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] backdrop-blur-md sm:hidden">

@@ -12,6 +12,10 @@ import {
   PACK_PRICE,
   moneroUri,
   batchCloseInfo,
+  TELEGRAM_CHANNEL,
+  TELEGRAM_CHANNEL_URL,
+  PGP_FINGERPRINT,
+  PGP_PUBKEY_URL,
 } from '@/lib/checkout';
 import { composeSysMsg, telegramUrl } from '@/lib/telegram';
 
@@ -221,9 +225,12 @@ export default function XmrPayModal({ open, onClose }: Props) {
             </button>
           </div>
         ) : (
-          <div className="grid flex-1 overflow-y-auto md:grid-cols-[280px_1fr]">
-            <div className="flex flex-col items-center justify-start gap-3 border-b border-cotton/10 bg-cotton p-5 md:border-b-0 md:border-r">
-              <div className="relative h-56 w-56 sm:h-64 sm:w-64">
+          <div className="grid flex-1 overflow-y-auto md:grid-cols-[320px_1fr]">
+            <div className="flex flex-col gap-4 border-b border-cotton/10 bg-onyx p-5 sm:p-6 md:border-b-0 md:border-r">
+              <div className="mono text-[10px] tracking-widest text-cotton/40">
+                ESCANEA · O TAP "ABRIR WALLET"
+              </div>
+              <div className="relative aspect-square w-full overflow-hidden rounded-sm bg-cotton p-3 sm:p-4">
                 {qrSvg ? (
                   <div
                     className="h-full w-full"
@@ -234,33 +241,48 @@ export default function XmrPayModal({ open, onClose }: Props) {
                   <img
                     src={FALLBACK_QR}
                     alt={`QR Monero ${batchTag}`}
-                    width={256}
-                    height={256}
                     className="h-full w-full"
                   />
                 )}
-                {qrLoading && !qrSvg && (
-                  <div className="mono absolute inset-0 flex items-center justify-center bg-cotton/80 text-[10px] tracking-widest text-onyx/60">
+                {qrLoading && (
+                  <div className="mono absolute inset-0 flex items-center justify-center bg-cotton/80 text-[11px] tracking-widest text-onyx/60">
                     GENERANDO QR…
                   </div>
                 )}
               </div>
-              <a
-                href={order?.uri || moneroUri(XMR_ADDRESS, XMR_AMOUNT_PACK, `TZAM_${batchTag}_PACK`)}
-                className="mono w-full border border-onyx px-3 py-2 text-center text-[10px] tracking-widest text-onyx transition hover:bg-onyx hover:text-cotton"
-              >
-                ABRIR WALLET
-              </a>
-              <button
-                onClick={regenerate}
-                className="mono w-full border border-onyx/30 px-3 py-2 text-center text-[10px] tracking-widest text-onyx/70 hover:border-onyx hover:text-onyx"
-                aria-label="Generar nueva orden"
-              >
-                ↻ NUEVA ORDEN
-              </button>
-              <p className="mono text-center text-[9px] leading-snug tracking-wider text-onyx/60">
-                Escanea con Monero GUI / Cake / Feather / Mysu.
+              <div className="flex flex-col gap-2">
+                <a
+                  href={order?.uri || moneroUri(XMR_ADDRESS, XMR_AMOUNT_PACK, `TZAM_${batchTag}_PACK`)}
+                  className="mono inline-flex min-h-[48px] w-full items-center justify-center border border-kinetic bg-kinetic px-4 text-center text-xs tracking-widest text-onyx transition hover:bg-cotton active:bg-cotton"
+                >
+                  ABRIR WALLET →
+                </a>
+                <button
+                  onClick={regenerate}
+                  className="mono inline-flex min-h-[44px] w-full items-center justify-center border border-cotton/20 px-4 text-center text-[11px] tracking-widest text-cotton/70 transition hover:border-cotton hover:text-cotton active:border-cotton active:text-cotton"
+                  aria-label="Generar nueva orden con monto único"
+                >
+                  ↻ NUEVA ORDEN
+                </button>
+              </div>
+              <p className="mono text-[11px] leading-relaxed text-cotton/50">
+                Wallets compatibles: <span className="text-cotton/80">Monero GUI · Cake · Feather · Mysu · Stack</span>
               </p>
+              {TELEGRAM_CHANNEL && (
+                <div className="mt-auto border-t border-cotton/10 pt-4">
+                  <div className="mono mb-1 text-[10px] tracking-widest text-cotton/40">
+                    ESTADO DE ENVÍOS
+                  </div>
+                  <a
+                    href={TELEGRAM_CHANNEL_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mono inline-flex min-h-[44px] w-full items-center justify-center border border-cotton/20 px-4 text-center text-[11px] tracking-widest text-cotton/80 transition hover:border-kinetic hover:text-kinetic active:border-kinetic active:text-kinetic"
+                  >
+                    📢 @{TELEGRAM_CHANNEL}
+                  </a>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col gap-5 p-5 sm:p-7">
@@ -351,12 +373,41 @@ export default function XmrPayModal({ open, onClose }: Props) {
                   <li>
                     <span className="text-kinetic">3.</span> Manda Order ID + TX proof + dirección de envío por Telegram (el botón pre-llena el formato).
                   </li>
+                  {TELEGRAM_CHANNEL && (
+                    <li>
+                      <span className="text-kinetic">4.</span> Sigue <a href={TELEGRAM_CHANNEL_URL} target="_blank" rel="noopener noreferrer" className="text-cotton underline decoration-cotton/40 hover:text-kinetic active:text-kinetic">@{TELEGRAM_CHANNEL}</a> — anunciamos cuándo enviamos tu Order ID. Si no quieres revelarlo en DM, tu Order ID es tu único identificador público.
+                    </li>
+                  )}
                 </ol>
               </div>
 
+              {PGP_FINGERPRINT && (
+                <div className="border-t border-cotton/10 pt-4">
+                  <div className="mono mb-1 text-[11px] tracking-widest text-cotton/40">
+                    PGP (OPCIONAL)
+                  </div>
+                  <p className="mono text-[11px] leading-relaxed text-cotton/60">
+                    Si prefieres cifrar el TX proof + envío, usa nuestra clave pública.
+                  </p>
+                  <div className="mono mt-2 break-all text-[11px] text-cotton/80">
+                    {PGP_FINGERPRINT}
+                  </div>
+                  {PGP_PUBKEY_URL && (
+                    <a
+                      href={PGP_PUBKEY_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mono mt-2 inline-flex min-h-[40px] items-center text-[11px] tracking-widest text-cotton/70 underline decoration-cotton/30 hover:text-kinetic active:text-kinetic"
+                    >
+                      DESCARGAR PUBKEY →
+                    </a>
+                  )}
+                </div>
+              )}
+
               <button
                 onClick={openTelegram}
-                className="mono mt-auto border border-kinetic bg-kinetic px-5 py-3 text-xs tracking-widest text-onyx transition hover:bg-cotton"
+                className="mono mt-auto inline-flex min-h-[48px] items-center justify-center border border-kinetic bg-kinetic px-5 py-3 text-xs tracking-widest text-onyx transition hover:bg-cotton active:bg-cotton"
               >
                 ENVIAR TX PROOF POR TELEGRAM →
               </button>

@@ -19,6 +19,13 @@ export function mailtoUrl(subject = 'Consulta TZAM', body = '') {
   return `mailto:${CONTACT_EMAIL}${params.length ? `?${params.join('&')}` : ''}`;
 }
 
+const RAW_CHANNEL = (process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL || '').trim().replace(/^@/, '');
+export const TELEGRAM_CHANNEL = RAW_CHANNEL;
+export const TELEGRAM_CHANNEL_URL = RAW_CHANNEL ? `https://t.me/${RAW_CHANNEL}` : '';
+
+export const PGP_FINGERPRINT = (process.env.NEXT_PUBLIC_PGP_FINGERPRINT || '').trim();
+export const PGP_PUBKEY_URL = (process.env.NEXT_PUBLIC_PGP_PUBKEY_URL || '').trim();
+
 export const XMR_ADDRESS = process.env.NEXT_PUBLIC_XMR_ADDRESS || '';
 export const XMR_AMOUNT_PACK = process.env.NEXT_PUBLIC_XMR_AMOUNT_PACK || '';
 export const XMR_AMOUNT_SINGLE = process.env.NEXT_PUBLIC_XMR_AMOUNT_SINGLE || '';

@@ -128,6 +128,9 @@ jobs:
           NEXT_PUBLIC_PACK_PAYMENT_URL: ${{ vars.NEXT_PUBLIC_PACK_PAYMENT_URL }}
           NEXT_PUBLIC_MP_ENABLED: ${{ vars.NEXT_PUBLIC_MP_ENABLED }}
           NEXT_PUBLIC_CONTACT_EMAIL: ${{ vars.NEXT_PUBLIC_CONTACT_EMAIL }}
+          NEXT_PUBLIC_TELEGRAM_CHANNEL: ${{ vars.NEXT_PUBLIC_TELEGRAM_CHANNEL }}
+          NEXT_PUBLIC_PGP_FINGERPRINT: ${{ vars.NEXT_PUBLIC_PGP_FINGERPRINT }}
+          NEXT_PUBLIC_PGP_PUBKEY_URL: ${{ vars.NEXT_PUBLIC_PGP_PUBKEY_URL }}
           NEXT_PUBLIC_XMR_ADDRESS: ${{ steps.xmr.outputs.address }}
           NEXT_PUBLIC_XMR_AMOUNT_PACK: ${{ steps.xmr.outputs.amount_pack }}
           NEXT_PUBLIC_XMR_AMOUNT_SINGLE: ${{ steps.xmr.outputs.amount_single }}
