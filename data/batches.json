@@ -1,0 +1,76 @@
+{
+  "flavors": [
+    {
+      "id": "01",
+      "code": "CITRUS",
+      "name": "Limón Persa",
+      "series": "frutal",
+      "labelBg": "cotton",
+      "candyColor": "#f5d000",
+      "profile": "Cítrico Agudo / Cristalino",
+      "structure": "Aceite Esencial de Limón (0.3%)",
+      "base": "Sacarosa Pura / Glucosa",
+      "finish": "Cobertura de Ácido Cítrico",
+      "price": 39,
+      "available": true,
+      "image": "flavor-01-citrus.png"
+    },
+    {
+      "id": "02",
+      "code": "MINT",
+      "name": "Menta Piperita",
+      "series": "fresca",
+      "labelBg": "onyx",
+      "candyColor": "#2ddc8a",
+      "profile": "Frescura Cristalina / Disolución Lenta",
+      "structure": "Mentha Piperita (Aceite Esencial) 0.4%",
+      "base": "Sacarosa Pura / Glucosa",
+      "finish": "Sin recubrimiento ácido",
+      "price": 39,
+      "available": true,
+      "image": "flavor-02-mint.png"
+    },
+    {
+      "id": "03",
+      "code": "CHERRY",
+      "name": "Cereza Carmín",
+      "series": "frutal",
+      "labelBg": "cotton",
+      "candyColor": "#c4112f",
+      "profile": "Dulce Sostenido / Acidez Suave",
+      "structure": "Prunus Avium (Concentrado) + Ácido Málico",
+      "base": "Sacarosa Pura / Glucosa",
+      "finish": "Cobertura Ácido Mixta",
+      "price": 39,
+      "available": true,
+      "image": "flavor-03-cherry.png"
+    },
+    {
+      "id": "04",
+      "code": "KINETIC",
+      "name": "Acid-Kick Energía",
+      "series": "kinetic",
+      "labelBg": "onyx",
+      "candyColor": "#e8ff00",
+      "profile": "Acidez Eléctrica / Picor de Jengibre",
+      "structure": "Lima-Persa + Capsicum Annuum + C8H10N4O2 (Cafeína 7mg ±0.5)",
+      "base": "Sacarosa Pura / Glucosa",
+      "finish": "Cobertura de Ácido Cítrico + Málico",
+      "warning": "Contiene 140mg cafeína por frasco. No exceder 5 piezas por ciclo de 4h. No apto menores 18 años ni sensibilidad cardíaca.",
+      "price": 42,
+      "available": false,
+      "comingSoon": true,
+      "image": "flavor-04-kinetic.png"
+    }
+  ],
+  "currentBatch": {
+    "id": "LOTE_00",
+    "progress": 62,
+    "logs": [
+      { "key": "MATRIZ_CAFEÍNA_ESTABILIZADA", "status": "OK" },
+      { "key": "CALIBRACIÓN_PERFIL_ÁCIDO", "status": "EN_PROCESO" },
+      { "key": "GEOMETRÍA_EMPAQUE_VERIFICADA", "status": "OK" },
+      { "key": "ALINEACIÓN_ESTAMPADO_COBRE", "status": "PENDIENTE" }
+    ]
+  }
+}
