@@ -1,15 +1,15 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
-import { composeSysMsg, telegramUrl } from '@/lib/telegram';
+import { PACK_PAYMENT_URL, PACK_PRICE } from '@/lib/checkout';
 
 type Line = { kind: 'in' | 'out' | 'err'; text: string };
 
 const AYUDA = [
-  'TZAM CLI v1.0 — comandos disponibles:',
+  'TZAM CLI v1.1 - comandos disponibles:',
   '  ayuda                ver esta ayuda',
   '  listar lotes         listar sabores disponibles',
-  '  leer manual.tzam     página de manual',
-  '  comprar <nº>         iniciar compra (telegram)',
+  '  leer manual.tzam     ver notas de producto',
+  '  comprar pack         abrir pago del pack',
   '  estado               estado del lote actual',
   '  quiensoy             identidad de sistema',
   '  limpiar              limpiar consola',
@@ -25,18 +25,17 @@ const SABORES = [
 
 const MANUAL = [
   'NOMBRE',
-  '    tzam — sistema de entrega de sabor de alta ingeniería',
+  '    tzam - dulces duros premium de sabor intenso',
   '',
   'SINOPSIS',
-  '    tzam [Nº_SABOR] [--volumen 50ml] [--kinetic]',
+  `    pack de 3 sabores disponibles - $${PACK_PRICE} MXN`,
   '',
   'DESCRIPCIÓN',
-  '    Micro-unidades de geometría domo para disolución controlada.',
-  '    No morder para evitar picos de acidez no lineales.',
+  '    Frascos de 40g hechos en San Luis Potosí.',
+  '    Citrus, Mint y Cherry con envío nacional incluido.',
   '',
-  'OPCIONES_KINETIC',
-  '    Nº 04 transporta carga activa de 7.0mg ± 0.5 de cafeína por unidad.',
-  '    El uso excesivo puede causar inestabilidad_sistema.',
+  'KINETIC',
+  '    Nº 04 está en desarrollo. Contiene cafeína y no está a la venta.',
   '',
   'ENTORNO',
   '    Diseñado y producido en San Luis Potosí, México.',
@@ -112,17 +111,11 @@ export default function TerminalOverlay() {
         break;
       case 'comprar':
       case 'buy': {
-        const n = rest[0];
-        if (!n) {
-          next.push({ kind: 'err', text: 'uso: comprar <nº> (ej: comprar 01)' });
-        } else {
-          const msg = composeSysMsg('PEDIDO', 'CLI', `Nº_${n}`);
-          try {
-            void navigator.clipboard.writeText(msg);
-          } catch {}
-          next.push({ kind: 'out', text: `mensaje copiado · abriendo Telegram para Nº ${n}...` });
-          window.open(telegramUrl(), '_blank', 'noopener,noreferrer');
+        if (rest[0] && rest[0] !== 'pack') {
+          next.push({ kind: 'out', text: 'la compra recomendada es el pack de 3 sabores.' });
         }
+        next.push({ kind: 'out', text: 'abriendo Mercado Pago para pack TZAM...' });
+        window.open(PACK_PAYMENT_URL, '_blank', 'noopener,noreferrer');
         break;
       }
       case 'limpiar':
@@ -147,7 +140,7 @@ export default function TerminalOverlay() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-4 right-4 z-40 mono text-[10px] tracking-widest px-3 py-2 border border-cotton/20 hover:border-kinetic hover:text-kinetic transition text-cotton/70"
+        className="fixed bottom-20 right-4 z-40 mono text-[10px] tracking-widest px-3 py-2 border border-cotton/20 hover:border-kinetic hover:text-kinetic transition text-cotton/70 sm:bottom-4"
         aria-label="Abrir terminal"
       >
         [ ABRIR TERMINAL ] · ⌃`

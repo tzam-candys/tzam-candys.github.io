@@ -36,12 +36,12 @@ export default function FlavorCard({ f }: { f: Flavor }) {
       >
         {isKinetic && (
           <div className="absolute top-0 right-0 mono text-[10px] tracking-widest text-kinetic px-2 py-1 border-l border-b border-kinetic/40 z-10">
-            KINETIC // COBRE
+            PRÓXIMAMENTE
           </div>
         )}
 
         <div className="absolute top-2 left-2 mono text-[10px] text-cotton/30 tracking-widest opacity-0 group-hover:opacity-100 transition">
-          [ INSPECCIONAR ]
+          VER SABOR
         </div>
 
         <div className="flex items-center justify-center py-4 relative h-56 sm:h-64 transition-transform group-hover:scale-[1.03]">
@@ -76,8 +76,8 @@ export default function FlavorCard({ f }: { f: Flavor }) {
             <dd>{f.profile}</dd>
           </div>
           <div className="grid grid-cols-[90px_1fr] gap-2">
-            <dt className="text-cotton/40">BASE</dt>
-            <dd>{f.base}</dd>
+            <dt className="text-cotton/40">FORMATO</dt>
+            <dd>Frasco 40g · dulce duro</dd>
           </div>
         </dl>
 
@@ -91,7 +91,7 @@ export default function FlavorCard({ f }: { f: Flavor }) {
               (f.available ? 'text-kinetic' : 'text-cotton/40')
             }
           >
-            {f.available ? '[ DISPONIBLE ]' : '[ PRÓXIMAMENTE ]'}
+            {f.available ? 'DISPONIBLE EN PACK' : 'PRÓXIMAMENTE'}
           </span>
         </div>
       </button>

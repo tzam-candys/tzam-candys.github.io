@@ -5,12 +5,13 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://tzam.mx';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
-  title: 'TZAM // CONFITERÍA DE ALTA INGENIERÍA',
+  title: 'TZAM | Dulces premium de sabor intenso en SLP',
   description:
-    'TZAM [50ml / 40g]. Sistema de entrega de sabor de alta concentración. San Luis Potosí, México.',
+    'Dulces duros premium hechos en San Luis Potosí. Prueba Citrus, Mint y Cherry en un pack de 3 con envío nacional incluido.',
   openGraph: {
-    title: 'TZAM // Confitería técnica',
-    description: 'Estructura. Pureza. Sin distracciones. SLP_MX 2026.',
+    title: 'TZAM | Dulces premium de sabor intenso',
+    description:
+      'Pack de 3 dulces duros premium hechos en San Luis Potosí, con envío nacional incluido.',
     type: 'website',
     locale: 'es_MX',
     url: SITE,
@@ -26,8 +27,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'TZAM',
-    description: 'Confitería técnica. SLP_MX 2026.',
+    title: 'TZAM | Dulces premium',
+    description: 'Sabor intenso hecho en San Luis Potosí.',
     images: ['/og.png'],
   },
 };
