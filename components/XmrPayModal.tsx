@@ -165,25 +165,34 @@ export default function XmrPayModal({ open, onClose }: Props) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex h-[100vh] w-full max-w-3xl flex-col overflow-hidden border border-cotton/15 bg-onyx animate-[modalIn_280ms_cubic-bezier(0.16,1,0.3,1)] sm:h-auto sm:max-h-[90vh]"
+        className="relative flex h-[100dvh] w-full max-w-3xl flex-col overflow-hidden border border-cotton/15 bg-onyx animate-[modalIn_280ms_cubic-bezier(0.16,1,0.3,1)] sm:h-auto sm:max-h-[90dvh]"
         style={{ boxShadow: '0 0 100px -28px #ff660055' }}
       >
-        <div className="mono flex items-center justify-between gap-3 border-b border-cotton/10 px-4 py-3 text-[10px] tracking-widest text-cotton/70 sm:px-6 sm:text-[11px]">
-          <div className="min-w-0 flex-1 truncate">
-            TZAM · PAGO XMR · {batchTag}
-            {XMR_FINGERPRINT && (
-              <span className="ml-2 text-cotton/40">· {XMR_FINGERPRINT}</span>
-            )}
-            {XMR_BATCH_OPENED_AT && (
-              <span className="ml-2 text-cotton/40">· abierto {XMR_BATCH_OPENED_AT}</span>
-            )}
-            {close && !isClosed && (
-              <span className="ml-2 text-cotton/40">· cierra {close.closesAt}</span>
-            )}
+        <div className="mono flex items-center justify-between gap-3 border-b border-cotton/10 px-4 py-3 text-[11px] tracking-wider text-cotton/70 sm:px-6 sm:tracking-widest">
+          <div className="min-w-0 flex-1">
+            <div className="truncate">
+              TZAM · PAGO XMR · {batchTag}
+              {XMR_FINGERPRINT && (
+                <span className="ml-2 hidden text-cotton/40 sm:inline">· {XMR_FINGERPRINT}</span>
+              )}
+            </div>
+            <div className="mt-0.5 truncate text-[10px] text-cotton/40 sm:hidden">
+              {XMR_FINGERPRINT}
+              {XMR_BATCH_OPENED_AT && ` · abre ${XMR_BATCH_OPENED_AT}`}
+              {close && !isClosed && ` · cierra ${close.closesAt}`}
+            </div>
+            <div className="hidden sm:inline">
+              {XMR_BATCH_OPENED_AT && (
+                <span className="ml-2 text-cotton/40">· abierto {XMR_BATCH_OPENED_AT}</span>
+              )}
+              {close && !isClosed && (
+                <span className="ml-2 text-cotton/40">· cierra {close.closesAt}</span>
+              )}
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="shrink-0 border border-cotton/20 px-2 py-1 hover:border-kinetic hover:text-kinetic"
+            className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center border border-cotton/20 px-3 hover:border-kinetic hover:text-kinetic active:border-kinetic active:text-kinetic"
             aria-label="Cerrar pago XMR"
           >
             CERRAR
@@ -313,7 +322,7 @@ export default function XmrPayModal({ open, onClose }: Props) {
                 </div>
                 <button
                   onClick={() => copy(XMR_ADDRESS, 'addr')}
-                  className="mono w-full break-all border border-cotton/15 bg-onyx/60 p-3 text-left text-[11px] leading-relaxed text-cotton hover:border-kinetic"
+                  className="mono w-full break-all border border-cotton/15 bg-onyx/60 p-3 text-left text-[13px] leading-relaxed text-cotton hover:border-kinetic active:border-kinetic sm:text-[11px]"
                   aria-label="Copiar dirección Monero"
                 >
                   {XMR_ADDRESS}

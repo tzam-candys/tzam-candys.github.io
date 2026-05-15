@@ -48,7 +48,7 @@ export default function FlavorModal({ flavor, open, onClose }: Props) {
       <div
         ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
-        className="relative flex h-[100vh] w-full max-w-5xl flex-col overflow-hidden border border-cotton/15 bg-onyx animate-[modalIn_280ms_cubic-bezier(0.16,1,0.3,1)] sm:h-[84vh]"
+        className="relative flex h-[100dvh] w-full max-w-5xl flex-col overflow-hidden border border-cotton/15 bg-onyx animate-[modalIn_280ms_cubic-bezier(0.16,1,0.3,1)] sm:h-[84dvh]"
         style={{ boxShadow: `0 0 100px -28px ${accent}55` }}
       >
         <div className="mono flex items-center justify-between gap-3 border-b border-cotton/10 px-4 py-3 text-[10px] tracking-widest text-cotton/70 sm:px-6 sm:text-[11px]">
@@ -57,7 +57,7 @@ export default function FlavorModal({ flavor, open, onClose }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="shrink-0 border border-cotton/20 px-2 py-1 hover:border-kinetic hover:text-kinetic"
+            className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center border border-cotton/20 px-3 hover:border-kinetic hover:text-kinetic active:border-kinetic active:text-kinetic"
             aria-label="Cerrar detalle de sabor"
           >
             CERRAR

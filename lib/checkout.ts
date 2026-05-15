@@ -6,6 +6,19 @@ export const PACK_PRICE = 179;
 export const PACK_NAME = 'Pack de 3';
 export const PACK_FLAVORS = ['Citrus', 'Mint', 'Cherry'];
 
+const MP_RAW = (process.env.NEXT_PUBLIC_MP_ENABLED || '').toLowerCase().trim();
+export const MP_ENABLED = !(MP_RAW === 'false' || MP_RAW === '0' || MP_RAW === 'no' || MP_RAW === 'off');
+
+export const CONTACT_EMAIL =
+  process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'tzam-candys@proton.me';
+
+export function mailtoUrl(subject = 'Consulta TZAM', body = '') {
+  const params: string[] = [];
+  if (subject) params.push(`subject=${encodeURIComponent(subject)}`);
+  if (body) params.push(`body=${encodeURIComponent(body)}`);
+  return `mailto:${CONTACT_EMAIL}${params.length ? `?${params.join('&')}` : ''}`;
+}
+
 export const XMR_ADDRESS = process.env.NEXT_PUBLIC_XMR_ADDRESS || '';
 export const XMR_AMOUNT_PACK = process.env.NEXT_PUBLIC_XMR_AMOUNT_PACK || '';
 export const XMR_AMOUNT_SINGLE = process.env.NEXT_PUBLIC_XMR_AMOUNT_SINGLE || '';

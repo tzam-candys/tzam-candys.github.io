@@ -8,10 +8,13 @@ import {
   PACK_NAME,
   PACK_PAYMENT_URL,
   PACK_PRICE,
+  MP_ENABLED,
   XMR_ENABLED,
   XMR_FINGERPRINT,
   XMR_BATCH_LABEL,
   XMR_BATCH_OPENED_AT,
+  CONTACT_EMAIL,
+  mailtoUrl,
 } from '@/lib/checkout';
 import TerminalOverlay from '@/components/TerminalOverlay';
 import data from '@/data/batches.json';
@@ -20,44 +23,56 @@ export default function Home() {
   const flavors = data.flavors as Flavor[];
   const batch = data.currentBatch;
   const packFlavors = flavors.filter((f) => PACK_FLAVORS.includes(f.code));
+  const HAS_PURCHASE = MP_ENABLED || XMR_ENABLED;
+  const emailHref = mailtoUrl(
+    'TZAM · consulta de pack',
+    'Hola, me interesa el pack TZAM. ¿Cómo puedo coordinarlo?',
+  );
 
   return (
-    <main className="relative min-h-screen pb-24 text-cotton sm:pb-0">
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-cotton/10 bg-onyx/80 px-6 py-5 backdrop-blur-md sm:px-12">
-        <a href="#inicio" className="flex items-center gap-3" aria-label="TZAM inicio">
-          <span className="text-xl font-extrabold tracking-[0.4em]">TZAM</span>
+    <main className="relative min-h-screen pb-[calc(env(safe-area-inset-bottom)+8rem)] text-cotton sm:pb-0">
+      <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-cotton/10 bg-onyx/80 px-4 py-3 backdrop-blur-md sm:px-12 sm:py-5">
+        <a href="#inicio" className="flex min-h-[44px] items-center gap-3" aria-label="TZAM inicio">
+          <span className="text-xl font-extrabold tracking-[0.4em] sm:text-xl">TZAM</span>
           <span className="mono hidden text-[10px] tracking-widest text-cotton/40 sm:inline">
             DULCES PREMIUM · SLP
           </span>
         </a>
-        <nav className="mono flex items-center gap-5 text-[11px] tracking-widest sm:gap-7">
-          <a href="#pack" className="hover:text-kinetic">
+        <nav className="mono flex items-center gap-2 text-[11px] tracking-widest sm:gap-7">
+          <a href="#pack" className="hidden min-h-[44px] items-center hover:text-kinetic active:text-kinetic sm:inline-flex">
             PACK
           </a>
-          <a href="#sabores" className="hidden hover:text-kinetic sm:inline">
+          <a href="#sabores" className="hidden min-h-[44px] items-center hover:text-kinetic active:text-kinetic sm:inline-flex">
             SABORES
           </a>
-          <a href="#envio" className="hidden hover:text-kinetic md:inline">
+          <a href="#envio" className="hidden min-h-[44px] items-center hover:text-kinetic active:text-kinetic md:inline-flex">
             ENVÍO
           </a>
-          <a href="#faq" className="hidden hover:text-kinetic sm:inline">
+          <a href="#faq" className="hidden min-h-[44px] items-center hover:text-kinetic active:text-kinetic sm:inline-flex">
             FAQ
           </a>
-          <a
-            href={PACK_PAYMENT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="border border-kinetic px-3 py-1.5 text-kinetic hover:bg-kinetic hover:text-onyx"
-            aria-label={`Comprar ${PACK_NAME} por Mercado Pago`}
-          >
-            COMPRAR
-          </a>
+          {MP_ENABLED && (
+            <a
+              href={PACK_PAYMENT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-[44px] items-center border border-kinetic px-3 py-2 text-kinetic hover:bg-kinetic hover:text-onyx active:bg-kinetic active:text-onyx"
+              aria-label={`Comprar ${PACK_NAME} por Mercado Pago`}
+            >
+              COMPRAR
+            </a>
+          )}
           {XMR_ENABLED && (
             <XmrButton
-              className="border border-cotton/30 px-3 py-1.5 text-cotton/80 hover:border-kinetic hover:text-kinetic"
+              className={
+                'inline-flex min-h-[44px] items-center px-3 py-2 ' +
+                (MP_ENABLED
+                  ? 'border border-cotton/30 text-cotton/80 hover:border-kinetic hover:text-kinetic active:border-kinetic active:text-kinetic'
+                  : 'border border-kinetic text-kinetic hover:bg-kinetic hover:text-onyx active:bg-kinetic active:text-onyx')
+              }
               ariaLabel="Pagar pack TZAM con Monero (XMR)"
             >
-              XMR
+              {MP_ENABLED ? 'XMR' : 'PAGAR XMR'}
             </XmrButton>
           )}
         </nav>
@@ -65,7 +80,7 @@ export default function Home() {
 
       <section
         id="inicio"
-        className="relative flex min-h-[88vh] items-end overflow-hidden border-b border-cotton/10"
+        className="relative flex min-h-[calc(100dvh-9rem)] items-end overflow-hidden border-b border-cotton/10 sm:min-h-[88vh]"
       >
         <div className="absolute inset-0">
           <Image
@@ -85,7 +100,7 @@ export default function Home() {
             <div className="mono text-[11px] tracking-widest text-cotton/60">
               HECHOS EN SAN LUIS POTOSÍ · 50ML / 40G POR FRASCO
             </div>
-            <h1 className="max-w-4xl text-5xl font-extrabold leading-[0.95] tracking-tight drop-shadow-2xl sm:text-7xl lg:text-8xl">
+            <h1 className="max-w-4xl text-[2.75rem] font-extrabold leading-[0.95] tracking-tight drop-shadow-2xl sm:text-7xl lg:text-8xl">
               Dulces premium.<br />
               <span className="text-kinetic">Sabor intenso.</span>
             </h1>
@@ -95,28 +110,44 @@ export default function Home() {
               nacional.
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
-              <a
-                href={PACK_PAYMENT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mono border border-kinetic bg-kinetic px-5 py-3 text-xs tracking-widest text-onyx transition hover:bg-cotton"
-                aria-label={`Comprar ${PACK_NAME} por ${PACK_PRICE} pesos en Mercado Pago`}
-              >
-                COMPRAR PACK · ${PACK_PRICE} MXN
-              </a>
+              {MP_ENABLED && (
+                <a
+                  href={PACK_PAYMENT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mono inline-flex min-h-[44px] items-center border border-kinetic bg-kinetic px-5 py-3 text-xs tracking-widest text-onyx transition hover:bg-cotton active:bg-cotton"
+                  aria-label={`Comprar ${PACK_NAME} por ${PACK_PRICE} pesos en Mercado Pago`}
+                >
+                  COMPRAR PACK · ${PACK_PRICE} MXN
+                </a>
+              )}
+              {XMR_ENABLED && (
+                <XmrButton
+                  className={
+                    'mono inline-flex min-h-[44px] items-center px-5 py-3 text-xs tracking-widest backdrop-blur-sm transition ' +
+                    (MP_ENABLED
+                      ? 'border border-cotton/30 bg-onyx/30 text-cotton/80 hover:border-kinetic hover:text-kinetic active:border-kinetic active:text-kinetic'
+                      : 'border border-kinetic bg-kinetic text-onyx hover:bg-cotton active:bg-cotton')
+                  }
+                  ariaLabel="Pagar pack con Monero XMR de forma privada"
+                >
+                  {MP_ENABLED ? 'PAGAR CON XMR' : `PAGAR CON XMR · ${PACK_PRICE} MXN`}
+                </XmrButton>
+              )}
               <a
                 href="#sabores"
-                className="mono border border-cotton/30 bg-onyx/30 px-5 py-3 text-xs tracking-widest text-cotton/80 backdrop-blur-sm transition hover:border-cotton hover:text-cotton"
+                className="mono inline-flex min-h-[44px] items-center border border-cotton/30 bg-onyx/30 px-5 py-3 text-xs tracking-widest text-cotton/80 backdrop-blur-sm transition hover:border-cotton hover:text-cotton active:border-cotton active:text-cotton"
               >
                 VER SABORES
               </a>
-              {XMR_ENABLED && (
-                <XmrButton
-                  className="mono border border-cotton/30 bg-onyx/30 px-5 py-3 text-xs tracking-widest text-cotton/80 backdrop-blur-sm transition hover:border-kinetic hover:text-kinetic"
-                  ariaLabel="Pagar pack con Monero XMR de forma privada"
+              {!HAS_PURCHASE && (
+                <a
+                  href={emailHref}
+                  className="mono inline-flex min-h-[44px] items-center border border-kinetic bg-kinetic px-5 py-3 text-xs tracking-widest text-onyx transition hover:bg-cotton active:bg-cotton"
+                  aria-label={`Escribir a ${CONTACT_EMAIL}`}
                 >
-                  PAGAR CON XMR
-                </XmrButton>
+                  ESCRIBIR · {CONTACT_EMAIL}
+                </a>
               )}
             </div>
           </div>
@@ -142,7 +173,16 @@ export default function Home() {
                 ['INCLUYE', 'Citrus + Mint + Cherry'],
                 ['ENVÍO', 'Nacional incluido'],
                 ['CONTENIDO', '3 frascos · 40g c/u'],
-                ['PAGO', XMR_ENABLED ? 'Mercado Pago · XMR' : 'Mercado Pago'],
+                [
+                  'PAGO',
+                  MP_ENABLED && XMR_ENABLED
+                    ? 'Mercado Pago · XMR'
+                    : MP_ENABLED
+                    ? 'Mercado Pago'
+                    : XMR_ENABLED
+                    ? 'Monero (XMR)'
+                    : 'Por email',
+                ],
               ].map(([k, v]) => (
                 <div key={k} className="grid grid-cols-[90px_1fr] gap-3 border-b border-cotton/10 py-3">
                   <dt className="text-cotton/40">{k}</dt>
@@ -150,22 +190,38 @@ export default function Home() {
                 </div>
               ))}
             </dl>
-            <a
-              href={PACK_PAYMENT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mono mt-5 block border border-kinetic px-5 py-3 text-center text-xs tracking-widest text-kinetic transition hover:bg-kinetic hover:text-onyx"
-              aria-label="Ir al checkout externo de Mercado Pago"
-            >
-              IR A PAGO SEGURO
-            </a>
+            {MP_ENABLED && (
+              <a
+                href={PACK_PAYMENT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mono mt-5 inline-flex min-h-[44px] w-full items-center justify-center border border-kinetic px-5 py-3 text-center text-xs tracking-widest text-kinetic transition hover:bg-kinetic hover:text-onyx active:bg-kinetic active:text-onyx"
+                aria-label="Ir al checkout externo de Mercado Pago"
+              >
+                IR A PAGO SEGURO
+              </a>
+            )}
             {XMR_ENABLED && (
               <XmrButton
-                className="mono mt-2 block w-full border border-cotton/30 px-5 py-3 text-center text-xs tracking-widest text-cotton/80 transition hover:border-kinetic hover:text-kinetic"
+                className={
+                  'mono inline-flex min-h-[44px] w-full items-center justify-center px-5 py-3 text-center text-xs tracking-widest transition ' +
+                  (MP_ENABLED
+                    ? 'mt-2 border border-cotton/30 text-cotton/80 hover:border-kinetic hover:text-kinetic active:border-kinetic active:text-kinetic'
+                    : 'mt-5 border border-kinetic text-kinetic hover:bg-kinetic hover:text-onyx active:bg-kinetic active:text-onyx')
+                }
                 ariaLabel="Pagar pack con Monero XMR (privado)"
               >
                 PAGAR CON XMR · PRIVADO
               </XmrButton>
+            )}
+            {!HAS_PURCHASE && (
+              <a
+                href={emailHref}
+                className="mono mt-5 inline-flex min-h-[44px] w-full items-center justify-center border border-kinetic px-5 py-3 text-center text-xs tracking-widest text-kinetic transition hover:bg-kinetic hover:text-onyx active:bg-kinetic active:text-onyx"
+                aria-label={`Escribir a ${CONTACT_EMAIL}`}
+              >
+                ESCRIBIR · {CONTACT_EMAIL}
+              </a>
             )}
           </aside>
         </div>
@@ -184,22 +240,38 @@ export default function Home() {
               envío.
             </p>
             <div className="flex flex-wrap gap-3">
-              <a
-                href={PACK_PAYMENT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mono inline-block border border-kinetic bg-kinetic px-6 py-3 text-xs tracking-widest text-onyx transition hover:bg-cotton"
-                aria-label={`Comprar pack de tres TZAM por ${PACK_PRICE} pesos`}
-              >
-                COMPRAR PACK DE 3
-              </a>
+              {MP_ENABLED && (
+                <a
+                  href={PACK_PAYMENT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mono inline-flex min-h-[44px] items-center border border-kinetic bg-kinetic px-6 py-3 text-xs tracking-widest text-onyx transition hover:bg-cotton active:bg-cotton"
+                  aria-label={`Comprar pack de tres TZAM por ${PACK_PRICE} pesos`}
+                >
+                  COMPRAR PACK DE 3
+                </a>
+              )}
               {XMR_ENABLED && (
                 <XmrButton
-                  className="mono inline-block border border-cotton/30 px-6 py-3 text-xs tracking-widest text-cotton/80 transition hover:border-kinetic hover:text-kinetic"
+                  className={
+                    'mono inline-flex min-h-[44px] items-center px-6 py-3 text-xs tracking-widest transition ' +
+                    (MP_ENABLED
+                      ? 'border border-cotton/30 text-cotton/80 hover:border-kinetic hover:text-kinetic active:border-kinetic active:text-kinetic'
+                      : 'border border-kinetic bg-kinetic text-onyx hover:bg-cotton active:bg-cotton')
+                  }
                   ariaLabel="Pagar pack con Monero XMR de forma privada"
                 >
-                  PAGAR CON XMR
+                  {MP_ENABLED ? 'PAGAR CON XMR' : 'PAGAR PACK CON XMR'}
                 </XmrButton>
+              )}
+              {!HAS_PURCHASE && (
+                <a
+                  href={emailHref}
+                  className="mono inline-flex min-h-[44px] items-center border border-kinetic bg-kinetic px-6 py-3 text-xs tracking-widest text-onyx transition hover:bg-cotton active:bg-cotton"
+                  aria-label={`Escribir a ${CONTACT_EMAIL}`}
+                >
+                  ESCRIBIR · {CONTACT_EMAIL}
+                </a>
               )}
             </div>
           </div>
@@ -279,31 +351,64 @@ export default function Home() {
                 Pagas en línea. Recibes el pack.
               </h2>
               <p className="mt-5 max-w-md leading-relaxed text-cotton/70">
-                El checkout se abre en Mercado Pago. Después del pago se prepara el pack
-                y se envía a cualquier estado de México.
+                {MP_ENABLED
+                  ? 'El checkout se abre en Mercado Pago. Después del pago se prepara el pack y se envía a cualquier estado de México.'
+                  : XMR_ENABLED
+                  ? 'Pago en Monero (XMR) — confirmación por Telegram con TX proof. Después se prepara el pack y se envía a cualquier estado de México.'
+                  : `Escríbenos a ${CONTACT_EMAIL} para coordinar pago y envío a cualquier estado de México.`}
               </p>
             </div>
             <dl className="mono text-xs">
-              {[
-                ['1', 'Compra el pack de 3 en Mercado Pago'],
-                ['2', 'Confirmamos datos de envío desde el checkout'],
-                ['3', 'Recibes Citrus, Mint y Cherry en un solo paquete'],
-              ].map(([k, v]) => (
+              {(MP_ENABLED
+                ? [
+                    ['1', 'Compra el pack de 3 en Mercado Pago'],
+                    ['2', 'Confirmamos datos de envío desde el checkout'],
+                    ['3', 'Recibes Citrus, Mint y Cherry en un solo paquete'],
+                  ]
+                : XMR_ENABLED
+                ? [
+                    ['1', 'Pagas en Monero al monto único de tu orden'],
+                    ['2', 'Mandas TX proof + envío por Telegram'],
+                    ['3', 'Recibes Citrus, Mint y Cherry en un solo paquete'],
+                  ]
+                : [
+                    ['1', `Nos escribes a ${CONTACT_EMAIL}`],
+                    ['2', 'Coordinamos pago y datos de envío'],
+                    ['3', 'Recibes el pack'],
+                  ]
+              ).map(([k, v]) => (
                 <div key={k} className="grid grid-cols-[40px_1fr] gap-4 border-b border-cotton/10 py-4">
                   <dt className="text-kinetic">{k}</dt>
                   <dd>{v}</dd>
                 </div>
               ))}
             </dl>
-            <a
-              href={PACK_PAYMENT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mono inline-block border border-kinetic px-6 py-3 text-xs tracking-widest text-kinetic transition hover:bg-kinetic hover:text-onyx"
-              aria-label="Comprar pack con envío nacional incluido"
-            >
-              COMPRAR CON ENVÍO INCLUIDO
-            </a>
+            {MP_ENABLED ? (
+              <a
+                href={PACK_PAYMENT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mono inline-flex min-h-[44px] items-center border border-kinetic px-6 py-3 text-xs tracking-widest text-kinetic transition hover:bg-kinetic hover:text-onyx active:bg-kinetic active:text-onyx"
+                aria-label="Comprar pack con envío nacional incluido"
+              >
+                COMPRAR CON ENVÍO INCLUIDO
+              </a>
+            ) : XMR_ENABLED ? (
+              <XmrButton
+                className="mono inline-flex min-h-[44px] items-center border border-kinetic px-6 py-3 text-xs tracking-widest text-kinetic transition hover:bg-kinetic hover:text-onyx active:bg-kinetic active:text-onyx"
+                ariaLabel="Pagar pack con XMR (envío incluido)"
+              >
+                PAGAR XMR · ENVÍO INCLUIDO
+              </XmrButton>
+            ) : (
+              <a
+                href={emailHref}
+                className="mono inline-flex min-h-[44px] items-center border border-kinetic px-6 py-3 text-xs tracking-widest text-kinetic transition hover:bg-kinetic hover:text-onyx active:bg-kinetic active:text-onyx"
+                aria-label={`Escribir a ${CONTACT_EMAIL}`}
+              >
+                ESCRIBIR · {CONTACT_EMAIL}
+              </a>
+            )}
           </div>
         </div>
       </section>
@@ -384,7 +489,11 @@ export default function Home() {
               ],
               [
                 '¿El envío está incluido?',
-                `Sí. El pack cuesta $${PACK_PRICE} MXN e incluye envío nacional dentro de México.`,
+                MP_ENABLED
+                  ? `Sí. El pack cuesta $${PACK_PRICE} MXN e incluye envío nacional dentro de México.`
+                  : XMR_ENABLED
+                  ? `Sí. El pack cuesta $${PACK_PRICE} MXN (≈ XMR equivalente) e incluye envío nacional dentro de México.`
+                  : `Sí. El pack cuesta $${PACK_PRICE} MXN e incluye envío nacional. Coordinamos por email a ${CONTACT_EMAIL}.`,
               ],
               [
                 '¿Puedo comprar un solo frasco?',
@@ -406,30 +515,59 @@ export default function Home() {
 
       <footer className="mono flex flex-wrap items-center justify-between gap-4 border-t border-cotton/10 px-6 py-12 text-[11px] text-cotton/50 sm:px-12">
         <div>TZAM · dulces premium hechos en San Luis Potosí · 2026</div>
-        <div className="flex gap-5">
-          <TelegramButton tipo="INFO_GENERAL" usuario="PIE" className="hover:text-kinetic">
-            /soporte-telegram
-          </TelegramButton>
+        <div className="flex flex-wrap gap-5">
+          {XMR_ENABLED && (
+            <TelegramButton
+              tipo="INFO_GENERAL"
+              usuario="PIE"
+              className="inline-flex min-h-[44px] items-center hover:text-kinetic active:text-kinetic"
+            >
+              /soporte-telegram
+            </TelegramButton>
+          )}
+          <a
+            href={emailHref}
+            className="inline-flex min-h-[44px] items-center hover:text-kinetic active:text-kinetic"
+            aria-label={`Escribir a ${CONTACT_EMAIL}`}
+          >
+            /{CONTACT_EMAIL}
+          </a>
         </div>
       </footer>
 
-      <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col gap-2 border-t border-kinetic/30 bg-onyx/95 p-3 backdrop-blur-md sm:hidden">
-        <a
-          href={PACK_PAYMENT_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mono block border border-kinetic bg-kinetic px-5 py-3 text-center text-xs tracking-widest text-onyx"
-          aria-label={`Comprar ${PACK_NAME} por ${PACK_PRICE} pesos`}
-        >
-          COMPRAR PACK · ${PACK_PRICE} MXN
-        </a>
+      <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col gap-2 border-t border-kinetic/30 bg-onyx/95 px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] backdrop-blur-md sm:hidden">
+        {MP_ENABLED && (
+          <a
+            href={PACK_PAYMENT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mono flex min-h-[48px] items-center justify-center border border-kinetic bg-kinetic px-5 text-center text-xs tracking-widest text-onyx active:bg-cotton"
+            aria-label={`Comprar ${PACK_NAME} por ${PACK_PRICE} pesos`}
+          >
+            COMPRAR PACK · ${PACK_PRICE} MXN
+          </a>
+        )}
         {XMR_ENABLED && (
           <XmrButton
-            className="mono block w-full border border-cotton/30 px-5 py-2 text-center text-[11px] tracking-widest text-cotton/80"
+            className={
+              'mono flex min-h-[48px] w-full items-center justify-center px-5 text-center tracking-widest ' +
+              (MP_ENABLED
+                ? 'border border-cotton/30 text-[11px] text-cotton/80 active:border-kinetic active:text-kinetic'
+                : 'border border-kinetic bg-kinetic text-xs text-onyx active:bg-cotton')
+            }
             ariaLabel="Pagar con Monero XMR de forma privada"
           >
-            O PAGAR CON XMR · PRIVADO
+            {MP_ENABLED ? 'O PAGAR CON XMR · PRIVADO' : `PAGAR PACK XMR · ${PACK_PRICE} MXN`}
           </XmrButton>
+        )}
+        {!HAS_PURCHASE && (
+          <a
+            href={emailHref}
+            className="mono flex min-h-[48px] items-center justify-center border border-kinetic bg-kinetic px-5 text-center text-xs tracking-widest text-onyx active:bg-cotton"
+            aria-label={`Escribir a ${CONTACT_EMAIL}`}
+          >
+            ESCRIBIR · {CONTACT_EMAIL}
+          </a>
         )}
       </div>
 
