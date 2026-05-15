@@ -6,3 +6,5 @@ out/
 *.log
 next-env.d.ts
 .vercel
+public/xmr-qr.svg
+public/xmr-meta.json

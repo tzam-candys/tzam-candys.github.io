@@ -3,7 +3,49 @@ name: Deploy TZAM to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    # 11:17 UTC daily → refresh XMR rate, re-evaluate auto-close horizon.
+    - cron: '17 11 * * *'
   workflow_dispatch:
+    inputs:
+      xmr_address:
+        description: 'XMR address del lote (95/106 chars, override de vars). Vacío = usar repo var.'
+        required: false
+        type: string
+      xmr_amount_pack:
+        description: 'Monto pack en XMR (decimal). Vacío = derivar del rate si XMR_DERIVE_AMOUNTS=1.'
+        required: false
+        type: string
+      xmr_amount_single:
+        description: 'Monto frasco en XMR (decimal). Vacío = derivar del rate.'
+        required: false
+        type: string
+      xmr_batch_label:
+        description: 'Etiqueta del lote (ej. LOTE_01).'
+        required: false
+        type: string
+      xmr_rate_mxn:
+        description: 'Tipo de cambio 1 XMR = ? MXN. Vacío = fetch coingecko automático.'
+        required: false
+        type: string
+      xmr_batch_opened_at:
+        description: 'Fecha apertura del lote (YYYY-MM-DD).'
+        required: false
+        type: string
+      xmr_batch_close_after_days:
+        description: 'Días tras apertura para auto-cerrar el lote (default repo var).'
+        required: false
+        type: string
+      xmr_derive_amounts:
+        description: 'Derivar amounts desde rate + precios MXN si no se proveen.'
+        required: false
+        type: boolean
+        default: false
+      xmr_strict:
+        description: 'Fallar build si faltan address+amount_pack+batch_label.'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -17,6 +59,15 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      xmr_batch_label: ${{ steps.build_step.outputs.xmr_batch_label }}
+      xmr_fingerprint: ${{ steps.build_step.outputs.xmr_fingerprint }}
+      xmr_amount_pack: ${{ steps.build_step.outputs.xmr_amount_pack }}
+      xmr_amount_single: ${{ steps.build_step.outputs.xmr_amount_single }}
+      xmr_rate_mxn: ${{ steps.build_step.outputs.xmr_rate_mxn }}
+      xmr_opened_at: ${{ steps.build_step.outputs.xmr_opened_at }}
+      xmr_closes_at: ${{ steps.build_step.outputs.xmr_closes_at }}
+      xmr_closed: ${{ steps.build_step.outputs.xmr_closed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,23 +83,92 @@ jobs:
         run: |
           REPO="${GITHUB_REPOSITORY##*/}"
           OWNER="${GITHUB_REPOSITORY_OWNER}"
-          # user/org site (e.g. tzam.github.io) sirve en root, otros repos en /repo
           if [ "$REPO" = "${OWNER}.github.io" ]; then
             echo "base=" >> "$GITHUB_OUTPUT"
           else
             echo "base=/$REPO" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Resolve XMR env (dispatch inputs override repo vars)
+        id: xmr
+        env:
+          IN_ADDRESS: ${{ inputs.xmr_address }}
+          IN_AMOUNT_PACK: ${{ inputs.xmr_amount_pack }}
+          IN_AMOUNT_SINGLE: ${{ inputs.xmr_amount_single }}
+          IN_BATCH_LABEL: ${{ inputs.xmr_batch_label }}
+          IN_RATE_MXN: ${{ inputs.xmr_rate_mxn }}
+          IN_OPENED_AT: ${{ inputs.xmr_batch_opened_at }}
+          IN_CLOSE_AFTER: ${{ inputs.xmr_batch_close_after_days }}
+          VAR_ADDRESS: ${{ vars.NEXT_PUBLIC_XMR_ADDRESS }}
+          VAR_AMOUNT_PACK: ${{ vars.NEXT_PUBLIC_XMR_AMOUNT_PACK }}
+          VAR_AMOUNT_SINGLE: ${{ vars.NEXT_PUBLIC_XMR_AMOUNT_SINGLE }}
+          VAR_BATCH_LABEL: ${{ vars.NEXT_PUBLIC_XMR_BATCH_LABEL }}
+          VAR_RATE_MXN: ${{ vars.NEXT_PUBLIC_XMR_RATE_MXN }}
+          VAR_OPENED_AT: ${{ vars.NEXT_PUBLIC_XMR_BATCH_OPENED_AT }}
+          VAR_CLOSE_AFTER: ${{ vars.NEXT_PUBLIC_XMR_BATCH_CLOSE_AFTER_DAYS }}
+        run: |
+          pick() { [ -n "$1" ] && echo "$1" || echo "$2"; }
+          {
+            echo "address=$(pick "$IN_ADDRESS" "$VAR_ADDRESS")"
+            echo "amount_pack=$(pick "$IN_AMOUNT_PACK" "$VAR_AMOUNT_PACK")"
+            echo "amount_single=$(pick "$IN_AMOUNT_SINGLE" "$VAR_AMOUNT_SINGLE")"
+            echo "batch_label=$(pick "$IN_BATCH_LABEL" "$VAR_BATCH_LABEL")"
+            echo "rate_mxn=$(pick "$IN_RATE_MXN" "$VAR_RATE_MXN")"
+            echo "opened_at=$(pick "$IN_OPENED_AT" "$VAR_OPENED_AT")"
+            echo "close_after=$(pick "$IN_CLOSE_AFTER" "$VAR_CLOSE_AFTER")"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Install dependencies
         run: npm ci || npm install
 
       - name: Build (static export)
+        id: build_step
         env:
           NEXT_PUBLIC_BASE_PATH: ${{ steps.basepath.outputs.base }}
           NEXT_PUBLIC_PACK_PAYMENT_URL: ${{ vars.NEXT_PUBLIC_PACK_PAYMENT_URL }}
+          NEXT_PUBLIC_XMR_ADDRESS: ${{ steps.xmr.outputs.address }}
+          NEXT_PUBLIC_XMR_AMOUNT_PACK: ${{ steps.xmr.outputs.amount_pack }}
+          NEXT_PUBLIC_XMR_AMOUNT_SINGLE: ${{ steps.xmr.outputs.amount_single }}
+          NEXT_PUBLIC_XMR_BATCH_LABEL: ${{ steps.xmr.outputs.batch_label }}
+          NEXT_PUBLIC_XMR_RATE_MXN: ${{ steps.xmr.outputs.rate_mxn }}
+          NEXT_PUBLIC_XMR_BATCH_OPENED_AT: ${{ steps.xmr.outputs.opened_at }}
+          NEXT_PUBLIC_XMR_BATCH_CLOSE_AFTER_DAYS: ${{ steps.xmr.outputs.close_after }}
+          XMR_DERIVE_AMOUNTS: ${{ inputs.xmr_derive_amounts && '1' || vars.XMR_DERIVE_AMOUNTS }}
+          XMR_BUILD_STRICT: ${{ inputs.xmr_strict && '1' || '' }}
         run: |
           npm run build
           touch out/.nojekyll
+
+      - name: Build summary
+        if: always()
+        env:
+          ADDRESS: ${{ steps.xmr.outputs.address }}
+          BATCH: ${{ steps.build_step.outputs.xmr_batch_label }}
+          FP: ${{ steps.build_step.outputs.xmr_fingerprint }}
+          AMOUNT_PACK: ${{ steps.build_step.outputs.xmr_amount_pack }}
+          AMOUNT_SINGLE: ${{ steps.build_step.outputs.xmr_amount_single }}
+          RATE: ${{ steps.build_step.outputs.xmr_rate_mxn }}
+          OPENED_AT: ${{ steps.build_step.outputs.xmr_opened_at }}
+          CLOSES_AT: ${{ steps.build_step.outputs.xmr_closes_at }}
+          CLOSED: ${{ steps.build_step.outputs.xmr_closed }}
+        run: |
+          {
+            echo "### TZAM build summary"
+            if [ -n "$ADDRESS" ]; then
+              echo "- XMR batch: \`${BATCH:-LOTE}\`"
+              echo "- XMR fingerprint: \`$FP\`"
+              echo "- XMR amount (pack): \`${AMOUNT_PACK:-—}\` XMR"
+              echo "- XMR amount (single): \`${AMOUNT_SINGLE:-—}\` XMR"
+              echo "- XMR rate: \`${RATE:-—} MXN/XMR\`"
+              echo "- XMR opened at: \`${OPENED_AT:-—}\`"
+              echo "- XMR closes at: \`${CLOSES_AT:-—}\`"
+              if [ "$CLOSED" = "1" ]; then
+                echo "- **⚠ LOTE CERRADO — site mostrará banner sin pago**"
+              fi
+            else
+              echo "- XMR pay: **disabled** (no address)"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -65,3 +185,47 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  notify:
+    needs: [build, deploy]
+    if: always() && needs.deploy.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Telegram notify
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          BATCH: ${{ needs.build.outputs.xmr_batch_label }}
+          FP: ${{ needs.build.outputs.xmr_fingerprint }}
+          AMOUNT_PACK: ${{ needs.build.outputs.xmr_amount_pack }}
+          RATE: ${{ needs.build.outputs.xmr_rate_mxn }}
+          CLOSED: ${{ needs.build.outputs.xmr_closed }}
+          CLOSES_AT: ${{ needs.build.outputs.xmr_closes_at }}
+          TRIGGER: ${{ github.event_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Telegram secrets not configured — skipping notify."
+            exit 0
+          fi
+          STATUS="✅ deploy OK"
+          if [ "$CLOSED" = "1" ]; then
+            STATUS="⚠️ LOTE CERRADO — sin pago"
+          fi
+          MSG=$(cat <<EOF
+TZAM · $STATUS
+trigger: \`$TRIGGER\`
+batch:   \`${BATCH:-—}\`
+fp:      \`${FP:-—}\`
+pack:    \`${AMOUNT_PACK:-—} XMR\`  · 1 XMR ≈ ${RATE:-—} MXN
+cierra:  \`${CLOSES_AT:-—}\`
+sha:     \`${SHA:0:7}\`
+EOF
+)
+          curl -sS -o /dev/null -X POST \
+            "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${MSG}" \
+            --data-urlencode "parse_mode=Markdown" \
+            --data-urlencode "disable_web_page_preview=true" \
+            || echo "Telegram notify failed (non-fatal)."

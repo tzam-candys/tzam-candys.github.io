@@ -1,6 +1,11 @@
 export const TELEGRAM_USERNAME = 'tzam_mx';
 
-export type TipoSolic = 'INFO_GENERAL' | 'PEDIDO' | 'MAYOREO' | 'REPORTE_LOTE';
+export type TipoSolic =
+  | 'INFO_GENERAL'
+  | 'PEDIDO'
+  | 'MAYOREO'
+  | 'REPORTE_LOTE'
+  | 'PAGO_XMR';
 
 export function composeSysMsg(
   tipo: TipoSolic,

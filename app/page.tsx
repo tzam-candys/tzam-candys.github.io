@@ -2,7 +2,17 @@ import Image from 'next/image';
 import FlavorCard, { Flavor } from '@/components/FlavorCard';
 import LoadingBar from '@/components/LoadingBar';
 import TelegramButton from '@/components/TelegramButton';
-import { PACK_FLAVORS, PACK_NAME, PACK_PAYMENT_URL, PACK_PRICE } from '@/lib/checkout';
+import XmrButton from '@/components/XmrButton';
+import {
+  PACK_FLAVORS,
+  PACK_NAME,
+  PACK_PAYMENT_URL,
+  PACK_PRICE,
+  XMR_ENABLED,
+  XMR_FINGERPRINT,
+  XMR_BATCH_LABEL,
+  XMR_BATCH_OPENED_AT,
+} from '@/lib/checkout';
 import TerminalOverlay from '@/components/TerminalOverlay';
 import data from '@/data/batches.json';
 
@@ -42,6 +52,14 @@ export default function Home() {
           >
             COMPRAR
           </a>
+          {XMR_ENABLED && (
+            <XmrButton
+              className="border border-cotton/30 px-3 py-1.5 text-cotton/80 hover:border-kinetic hover:text-kinetic"
+              ariaLabel="Pagar pack TZAM con Monero (XMR)"
+            >
+              XMR
+            </XmrButton>
+          )}
         </nav>
       </header>
 
@@ -92,6 +110,14 @@ export default function Home() {
               >
                 VER SABORES
               </a>
+              {XMR_ENABLED && (
+                <XmrButton
+                  className="mono border border-cotton/30 bg-onyx/30 px-5 py-3 text-xs tracking-widest text-cotton/80 backdrop-blur-sm transition hover:border-kinetic hover:text-kinetic"
+                  ariaLabel="Pagar pack con Monero XMR de forma privada"
+                >
+                  PAGAR CON XMR
+                </XmrButton>
+              )}
             </div>
           </div>
 
@@ -116,7 +142,7 @@ export default function Home() {
                 ['INCLUYE', 'Citrus + Mint + Cherry'],
                 ['ENVÍO', 'Nacional incluido'],
                 ['CONTENIDO', '3 frascos · 40g c/u'],
-                ['PAGO', 'Mercado Pago'],
+                ['PAGO', XMR_ENABLED ? 'Mercado Pago · XMR' : 'Mercado Pago'],
               ].map(([k, v]) => (
                 <div key={k} className="grid grid-cols-[90px_1fr] gap-3 border-b border-cotton/10 py-3">
                   <dt className="text-cotton/40">{k}</dt>
@@ -133,6 +159,14 @@ export default function Home() {
             >
               IR A PAGO SEGURO
             </a>
+            {XMR_ENABLED && (
+              <XmrButton
+                className="mono mt-2 block w-full border border-cotton/30 px-5 py-3 text-center text-xs tracking-widest text-cotton/80 transition hover:border-kinetic hover:text-kinetic"
+                ariaLabel="Pagar pack con Monero XMR (privado)"
+              >
+                PAGAR CON XMR · PRIVADO
+              </XmrButton>
+            )}
           </aside>
         </div>
       </section>
@@ -149,15 +183,25 @@ export default function Home() {
               más fácil de conocer la marca, comparar perfiles y recibir todo en un solo
               envío.
             </p>
-            <a
-              href={PACK_PAYMENT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mono inline-block border border-kinetic bg-kinetic px-6 py-3 text-xs tracking-widest text-onyx transition hover:bg-cotton"
-              aria-label={`Comprar pack de tres TZAM por ${PACK_PRICE} pesos`}
-            >
-              COMPRAR PACK DE 3
-            </a>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href={PACK_PAYMENT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mono inline-block border border-kinetic bg-kinetic px-6 py-3 text-xs tracking-widest text-onyx transition hover:bg-cotton"
+                aria-label={`Comprar pack de tres TZAM por ${PACK_PRICE} pesos`}
+              >
+                COMPRAR PACK DE 3
+              </a>
+              {XMR_ENABLED && (
+                <XmrButton
+                  className="mono inline-block border border-cotton/30 px-6 py-3 text-xs tracking-widest text-cotton/80 transition hover:border-kinetic hover:text-kinetic"
+                  ariaLabel="Pagar pack con Monero XMR de forma privada"
+                >
+                  PAGAR CON XMR
+                </XmrButton>
+              )}
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
@@ -300,6 +344,24 @@ export default function Home() {
                 </li>
               ))}
             </ul>
+            {XMR_ENABLED && (
+              <div className="mono mt-5 grid gap-1.5 border-t border-cotton/10 pt-4 text-[10px] tracking-widest text-cotton/50">
+                <div className="flex justify-between gap-3">
+                  <span>XMR LOTE</span>
+                  <span className="text-cotton/80">{XMR_BATCH_LABEL || batch.id}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span>FINGERPRINT</span>
+                  <span className="text-kinetic">{XMR_FINGERPRINT}</span>
+                </div>
+                {XMR_BATCH_OPENED_AT && (
+                  <div className="flex justify-between gap-3">
+                    <span>ABIERTO</span>
+                    <span className="text-cotton/80">{XMR_BATCH_OPENED_AT}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -351,7 +413,7 @@ export default function Home() {
         </div>
       </footer>
 
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-kinetic/30 bg-onyx/95 p-3 backdrop-blur-md sm:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col gap-2 border-t border-kinetic/30 bg-onyx/95 p-3 backdrop-blur-md sm:hidden">
         <a
           href={PACK_PAYMENT_URL}
           target="_blank"
@@ -361,6 +423,14 @@ export default function Home() {
         >
           COMPRAR PACK · ${PACK_PRICE} MXN
         </a>
+        {XMR_ENABLED && (
+          <XmrButton
+            className="mono block w-full border border-cotton/30 px-5 py-2 text-center text-[11px] tracking-widest text-cotton/80"
+            ariaLabel="Pagar con Monero XMR de forma privada"
+          >
+            O PAGAR CON XMR · PRIVADO
+          </XmrButton>
+        )}
       </div>
 
       <TerminalOverlay />

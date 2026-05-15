@@ -5,3 +5,40 @@ export const PACK_PAYMENT_URL =
 export const PACK_PRICE = 179;
 export const PACK_NAME = 'Pack de 3';
 export const PACK_FLAVORS = ['Citrus', 'Mint', 'Cherry'];
+
+export const XMR_ADDRESS = process.env.NEXT_PUBLIC_XMR_ADDRESS || '';
+export const XMR_AMOUNT_PACK = process.env.NEXT_PUBLIC_XMR_AMOUNT_PACK || '';
+export const XMR_AMOUNT_SINGLE = process.env.NEXT_PUBLIC_XMR_AMOUNT_SINGLE || '';
+export const XMR_BATCH_LABEL = process.env.NEXT_PUBLIC_XMR_BATCH_LABEL || '';
+export const XMR_RATE_MXN = process.env.NEXT_PUBLIC_XMR_RATE_MXN || '';
+export const XMR_BATCH_OPENED_AT = process.env.NEXT_PUBLIC_XMR_BATCH_OPENED_AT || '';
+export const XMR_BATCH_CLOSE_AFTER_DAYS = process.env.NEXT_PUBLIC_XMR_BATCH_CLOSE_AFTER_DAYS || '';
+export const XMR_ENABLED = XMR_ADDRESS.length > 0;
+export const XMR_FINGERPRINT = XMR_ADDRESS
+  ? `${XMR_ADDRESS.slice(0, 6)}…${XMR_ADDRESS.slice(-6)}`
+  : '';
+
+export function batchCloseInfo(openedAt: string, closeAfterDays: string) {
+  if (!openedAt || !closeAfterDays) return null;
+  const days = Number(closeAfterDays);
+  if (!Number.isFinite(days) || days <= 0) return null;
+  const opened = new Date(`${openedAt}T00:00:00Z`).getTime();
+  if (!Number.isFinite(opened)) return null;
+  const closeMs = opened + days * 86400000;
+  return {
+    closesAt: new Date(closeMs).toISOString().slice(0, 10),
+    closesAtMs: closeMs,
+  };
+}
+
+export function moneroUri(
+  address: string,
+  amount?: string,
+  description?: string
+) {
+  if (!address) return '';
+  const params: string[] = [];
+  if (amount) params.push(`tx_amount=${encodeURIComponent(amount)}`);
+  if (description) params.push(`tx_description=${encodeURIComponent(description)}`);
+  return params.length ? `monero:${address}?${params.join('&')}` : `monero:${address}`;
+}
